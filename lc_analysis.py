@@ -9,6 +9,8 @@ import pandas as pd
 import numpy as np
 import matplotlib as plt
 from datetime import datetime
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.cross_validation import KFold
 
 payment_cols = ["out_prncp", "out_prncp_inv", "total_pymnt", "total_pymnt_inv", "total_rec_prncp", "total_rec_int", "total_rec_late_fee", "recoveries",
                    "collection_recovery_fee", "last_pymnt_d", "last_pymnt_amnt", "last_credit_pull_d", "collections_12_mths_ex_med", "acc_now_delinq",
@@ -100,6 +102,29 @@ lc.drop(["home_ownership", "verification_status", "purpose", "sub_grade"], axis=
 #map unique loan statuses into "on time" or "late"
 lc["gen_loan_status"] = lc["loan_status"].map(generalize_loan_status)
 lc.drop("loan_status", axis=1, inplace=True) #now we don't need this anymore
+
+#based on code at https://github.com/savarin/pyconuk-introtutorial
+       
+#reorder columns so variable being predicted is in first column
+cols = lc.columns.tolist()
+cols = cols[-1:] + cols[:-1]
+lc = lc[cols]
+
+data = lc.values
+X = data[:, 1:]
+y = data[:, 0]
+
+cv = KFold(n=len(data), n_folds=8)
+
+for training_set, test_set in cv:
+    X_train = X[training_set]
+    y_train = y[training_set]
+    X_test = X[test_set]
+    y_test = y[test_set]
+    model = RandomForestClassifier(n_estimators=100)
+    model.fit(X_train, y_train)
+    y_prediction = model.predict(X_test)
+    print("prediction accuracy:", np.sum(y_test == y_prediction)*1./len(y_test))
 
 #sample query
 #lc.loc[lc["grade"] == "A"]["loan_status"].value_counts().plot(kind="bar")
