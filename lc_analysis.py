@@ -1,10 +1,3 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Thu Jun 15 12:56:59 2017
-
-@author: Nihar Sheth
-"""
-
 import pandas as pd
 import numpy as np
 import matplotlib as plt
@@ -61,13 +54,18 @@ def convertEmploymentLength (value):
     else:
         return int(value[0])
 
+def convertPercStrToFloat (x):
+    try:
+        return float(str(x)[:-1])
+    except:
+        return np.NaN
+
 #returns approximation of months from issue to present date
 def monthsSinceIssue (stringIssueDate):
     return int((datetime.now().date() - datetime.strptime(stringIssueDate, "%b-%y").date()).days / 30) + 1
 
-#lc = lc.dropna(axis = 1, how = "all") #drop all columns that are completely null
 lc = deleteColsWithMatchingCond(notEnoughCoverage, lc)
-lc = lc.dropna() #drop any rows with NaN vals (this is a temp solution) TODO: better solution needed
+lc = lc.dropna(how = "any", subset = ["annual_inc", "verification_status", "delinq_2yrs", "dti", "inq_last_6mths", "installment", "loan_amnt", "term", "home_ownership", "int_rate", "grade", "sub_grade", "issue_d", "loan_status", "emp_length"]) #make sure the super-important variables are present
 lc = deleteColsWithMatchingCond(isColAllSame, lc) #drop any columns where all values are the same                           
 
 lc.drop(extraneous_cols, axis=1, inplace=True)
@@ -80,9 +78,12 @@ lc.drop(payment_cols, axis=1, inplace=True)
 lc["loan_status"] = lc["loan_status"].str.replace("Does not meet the credit policy. Status:Fully Paid", "Fully Paid")
 lc["loan_status"] = lc["loan_status"].str.replace("Does not meet the credit policy. Status:Charged Off", "Charged Off")
 
+lc["int_rate"] = lc["int_rate"].apply(convertPercStrToFloat) #convert int rate string to float
+lc["revol_util"] = lc["revol_util"].apply(convertPercStrToFloat) #convert string to float
+
+lc = lc.apply(lambda x: x.fillna(x.median()) if x.dtype.kind in "biufc" else x)
+
 lc["term"] = lc["term"].map({" 36 months" : 36, " 60 months" : 60}).astype(int) #convert term to ints
-lc["int_rate"] = lc["int_rate"].apply(lambda x : float(str(x)[:-1])) #convert int rate string to float
-lc["revol_util"] = lc["revol_util"].apply(lambda x : float(str(x)[:-1])) #convert string to float
 lc["emp_length"] = lc["emp_length"].apply(convertEmploymentLength)
 
 #take out loans that haven't matured yet, since we only want matured loans
@@ -123,6 +124,7 @@ for training_set, test_set in cv:
     y_test = y[test_set]
     model = RandomForestClassifier(n_estimators=100)
     model.fit(X_train, y_train)
+    
     y_prediction = model.predict(X_test)
     print("prediction accuracy:", np.sum(y_test == y_prediction)*1./len(y_test))
 
