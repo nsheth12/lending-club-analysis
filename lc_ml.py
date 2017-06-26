@@ -8,7 +8,7 @@ payment_cols = ["out_prncp", "out_prncp_inv", "total_pymnt", "total_pymnt_inv", 
                    "collection_recovery_fee", "last_pymnt_d", "last_pymnt_amnt", "last_credit_pull_d", "collections_12_mths_ex_med", "acc_now_delinq",
                    "tot_coll_amt", "tot_cur_bal", "total_rev_hi_lim", "acc_open_past_24mths", "avg_cur_bal", "bc_open_to_buy", "bc_util", "chargeoff_within_12_mths",
                    "delinq_amnt", "mo_sin_old_il_acct", "mo_sin_old_rev_tl_op", "mo_sin_rcnt_rev_tl_op", "mo_sin_rcnt_tl", "tot_hi_cred_lim", "total_bal_ex_mort", "total_bc_limit", "total_il_high_credit_limit"]
-
+#need to remove payment cols, issue_d, grade
 
 #standardize loan statuses so they are either "on time" or "late"
 def generalize_loan_status (loan_status):
