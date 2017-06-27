@@ -9,6 +9,8 @@ import pandas as pd
 from datetime import datetime
 import numpy as np
 
+pd.options.mode.chained_assignment = None  # default='warn', gets rid of annoying warnings
+
 extraneous_cols = ["initial_list_status", "loan_amnt", "funded_amnt_inv", "emp_title",
                    "pymnt_plan", "zip_code", "title", "addr_state", "earliest_cr_line",
                    "loan_status"] #few factors here that I'd like to include eventually
@@ -57,12 +59,14 @@ def convertPercStrToFloat (x):
     except:
         return np.NaN
 
+#load data out of CSV files
 def loadData (files):
     dfs = []
     for file in files:
-        dfs.append(pd.read_csv(file))
+        dfs.append(pd.read_csv(file, low_memory = False)) #low_memory option gets rid of annoying warning
     return pd.concat(dfs)
 
+#drop extra columns that aren't necessary or important
 def dropExtraCols (lc):
     lc.drop(extraneous_cols, axis=1, inplace=True)
     lc = deleteColsWithMatchingCond(notEnoughCoverage, lc)
@@ -94,11 +98,7 @@ def keepVintages (lc):
     lc["issue_date"] = lc["issue_d"].apply(lambda dateStr : datetime.strptime(dateStr, "%b-%y").date())
     #longTerm = lc.apply(lambda row : print(row.name, " ", row["issue_date"], " ", row["term"],  " ", monthsSinceIssue(row["issue_date"]) >= row["term"]), axis=1)
     longTerm = lc.apply(lambda row : monthsSinceIssue(row["issue_date"]) >= row["term"], axis=1)
-    #somehow this is dropping valid 2007 loans when the 2012-2013 data set is added in
-    #lc.drop(shortTerm[shortTerm].index, inplace=True)
-    #print(min(longTerm[longTerm == True].index))
-    lc = lc.ix[longTerm[longTerm == True].index.tolist()]
-    #lc = lc.loc[longTerm[longTerm == True].index, :]
+    lc = lc.loc[longTerm[longTerm == True].index.tolist()]
     lc.drop("issue_d", axis=1, inplace=True) #now we don't need this anymore
     return lc
 
@@ -110,6 +110,8 @@ def calcReturns (lc):
     
 #combine all these preprocessing steps into one    
 def preprocess (lc):
+    #since different files are merged, there are duplicate indexes, this flattens it out
+    lc.reset_index(drop = True, inplace = True)
     lc = dropExtraCols(lc)
     lc = replacements(lc)
     lc = fillnas(lc)
