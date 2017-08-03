@@ -17,9 +17,9 @@ def backtest (indexes):
     #count = data.count()
     return mean
 
-lc = preprocessor.loadData(["C:/Nihar/Finance/LC_2007_2011_loan_data.csv",
-                            "C:/Nihar/Finance/LC_2012_2013_loan_data.csv",
-                            "C:/Nihar/Finance/LC_2014_loan_data.csv"])
+lc = preprocessor.loadData(["/Users/nihar/Nihar/Finance/LC_2007_2011_loan_data.csv",
+                            "/Users/nihar/Nihar/Finance/LC_2012_2013_loan_data.csv",
+                            "/Users/nihar/Nihar/Finance/LC_2014_loan_data.csv"])
 lc = preprocessor.preprocess(lc)
 
 #print("Source Verified ", backtest(lc[lc["verification_status"] == "Source Verified"].index.tolist()))

@@ -62,11 +62,20 @@ for training_set, test_set in cv:
     
     runningSum = 0.0
     runningCount = 0
+    defaultCount = 0
+    defaultSum = 0.0
     for idx, val in enumerate(y_prediction):
         if val >= 1.1:
             runningSum += y_test[idx]
             runningCount += 1
+            if y_test[idx] < 1:
+                defaultSum += y_test[idx]
+                defaultCount += 1
     print("Return: ", runningSum / runningCount)
+    print("Count: ", runningCount)
+    print("Default rate: ", defaultCount / runningCount)
+    print("Average return for defaulted loans: ", defaultSum / defaultCount)
+    print()
     
 #    print("Actual: ", y_test[0], " ; Predicted: ", y_prediction[0])
 #    print("Actual: ", y_test[1], " ; Predicted: ", y_prediction[1])
