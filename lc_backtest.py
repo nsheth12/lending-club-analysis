@@ -11,15 +11,15 @@ from datetime import datetime
 
 #maybe this should also return the number of samples on which the mean is based, as well as other stats?
 def backtest (indexes):
-    data = lc["total_return"].ix[indexes]
-    mean = data.mean()
-    #std = data.std()
-    #count = data.count()
-    return mean
+	data = lc["total_return"].ix[indexes]
+	mean = data.mean()
+	#std = data.std()
+	#count = data.count()
+	return mean
 
 lc = preprocessor.loadData(["/Users/nihar/Nihar/Finance/LC_2007_2011_loan_data.csv",
-                            "/Users/nihar/Nihar/Finance/LC_2012_2013_loan_data.csv",
-                            "/Users/nihar/Nihar/Finance/LC_2014_loan_data.csv"])
+							"/Users/nihar/Nihar/Finance/LC_2012_2013_loan_data.csv",
+							"/Users/nihar/Nihar/Finance/LC_2014_loan_data.csv"])
 lc = preprocessor.preprocess(lc)
 
 #print("Source Verified ", backtest(lc[lc["verification_status"] == "Source Verified"].index.tolist()))
